@@ -84,8 +84,8 @@ int Interpreter::run(){
 
     for (auto it = code.begin(); it != code.end(); it++){
 
-        std::cout.put(*it);
-        std::cout.flush();
+        // std::cout.put(*it);
+        // std::cout.flush();
         
         switch (*it) {
             case '[':
@@ -98,7 +98,6 @@ int Interpreter::run(){
                     if (*it == ']') braces--;
                 }
                 
-                it++;
             }
             
             break;
@@ -112,7 +111,6 @@ int Interpreter::run(){
                     if (*it == '[') braces--;
                 }
                 
-                it++;
             }
             
             break;
@@ -153,7 +151,7 @@ int Interpreter::run(){
             break;
         }
 
-        std::cout << "\n\tcurrent = head: " << tapeHeadIndex << " value: " << (int)(tape[tapeHeadIndex]) << " char: " << it - code.begin() << std::endl;
+        // std::cout << "\n\tcurrent = head: " << tapeHeadIndex << " value: " << (int)(tape[tapeHeadIndex]) << " char: " << it - code.begin() << std::endl;
         
     }
 
