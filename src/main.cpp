@@ -6,6 +6,9 @@
 
 
 
+// example: 
+//        ./main ../examples/HelloWorld.txt
+
 
 
 class Interpreter {
@@ -31,6 +34,7 @@ class Interpreter {
 Interpreter::Interpreter(std::string code, size_t tapeLength)
     : code (code), tapeLength(tapeLength), tape(std::make_unique<char[]>(tapeLength)), tapeHeadIndex(0) {
         std::fill_n(tape.get(), tapeLength, 0);
+        validate();
 }
 
 
@@ -52,7 +56,7 @@ int Interpreter::validate(){
             bracesCount--;
 
             if (bracesCount < 0) 
-                throw std::runtime_error(std::format("{} missmatched braces detected", bracesCount));
+                throw std::runtime_error(std::format("Missmatched braces detected"));
 
             break;
         case '<':
@@ -61,11 +65,13 @@ int Interpreter::validate(){
         case '-':
         case '.':
         case ',':
+        case ' ':
+        case '\t':
+        case '\n':
             break;
         default:
-            throw 
-                std::runtime_error(std::format("Unrecognized character: {} at index {}", code[i], i));
 
+            throw std::runtime_error(std::format("Unrecognized character: {} ({}) at index {}", code[i], (int)code[i], i));
             break;
         }
 
@@ -174,7 +180,7 @@ int main(int argc, char const *argv[]){
 
     int tapeLength = 30000;
     if (argc >= 3) {
-        tapeLength = atoi(argv[3]);
+        tapeLength = atoi(argv[2]);
         if (tapeLength < 1) throw std::runtime_error("Invalid tape lenght");
     }
 
