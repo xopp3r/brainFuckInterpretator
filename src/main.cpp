@@ -18,7 +18,7 @@ class Interpreter {
     
     private:
     size_t tapeLength;
-    char* tapeHeadPtr;
+    size_t tapeHeadIndex;
     std::string code;
     std::unique_ptr<char[]> tape;
 
@@ -29,7 +29,7 @@ class Interpreter {
 
 
 Interpreter::Interpreter(std::string code, size_t tapeLength)
-    : code (code), tapeLength(tapeLength), tape(std::make_unique<char[]>(tapeLength)), tapeHeadPtr(tape.get()) {
+    : code (code), tapeLength(tapeLength), tape(std::make_unique<char[]>(tapeLength)), tapeHeadIndex(0) {
         std::fill_n(tape.get(), tapeLength, 0);
 }
 
@@ -40,7 +40,7 @@ Interpreter::~Interpreter(){}
 
 
 int Interpreter::validate(){
-    int  bracesCount = 0;
+    int bracesCount = 0;
 
     for (int i = 0; i < code.size(); i++){
 
@@ -84,73 +84,80 @@ int Interpreter::run(){
 
     for (auto it = code.begin(); it != code.end(); it++){
 
+        std::cout.put(*it);
+        std::cout.flush();
+        
         switch (*it) {
-        case '[':
-
-            if (*tapeHeadPtr == 0){
+            case '[':
+            
+            if (tape[tapeHeadIndex] == 0){
                 int braces = 0;
-
+                
                 while (!(*(++it) == ']' && braces == 0)) {
                     if (*it == '[') braces++;
                     if (*it == ']') braces--;
                 }
-
+                
                 it++;
             }
-
+            
             break;
-        case ']':
-
-            if (*tapeHeadPtr != 0){
+            case ']':
+            
+            if (tape[tapeHeadIndex] != 0){
                 int braces = 0;
-
+                
                 while (!(*(--it) == '[' && braces == 0)) {
                     if (*it == ']') braces++;
                     if (*it == '[') braces--;
                 }
-
+                
                 it++;
             }
-
+            
             break;
-        case '<':
-            tapeHeadPtr--;
-
-            if (tapeHeadPtr < tape.get())
+            case '<':
+            tapeHeadIndex--;
+            
+            if (tapeHeadIndex < 0)
                 throw std::runtime_error(std::format("Out of bounds indexing at {}", it - code.begin()));
             
             break;
-        case '>':
-            tapeHeadPtr++;
-
-            if (tapeHeadPtr < tape.get() + tapeLength)
+            case '>':
+            tapeHeadIndex++;
+            
+            if (tapeHeadIndex >= tapeLength)
                 throw std::runtime_error(std::format("Out of bounds indexing at {}", it - code.begin()));
             
             break;
-        case '+':
-
-            (*tapeHeadPtr)++;
-
+            case '+':
+            
+            tape[tapeHeadIndex]++;
+            
             break;
-        case '-':
-        
-            (*tapeHeadPtr)++;
-
+            case '-':
+            
+            tape[tapeHeadIndex]--;
+            
             break;
-        case '.':
-
-            std::cout.put(*tapeHeadPtr);
-
+            case '.':
+            
+            std::cout.put(tape[tapeHeadIndex]);
+            std::cout.flush();
+            
             break;
-        case ',':
-
-            std::cin.read(tapeHeadPtr, 1);
-
+            case ',':
+            
+            std::cin.read(tape.get() + tapeHeadIndex, 1);
+            
             break;
         }
 
+        std::cout << "\n\tcurrent = head: " << tapeHeadIndex << " value: " << (int)(tape[tapeHeadIndex]) << " char: " << it - code.begin() << std::endl;
+        
     }
 
+    
     return 0;
 }
 
@@ -161,6 +168,7 @@ int Interpreter::run(){
 
 
 int main(int argc, char const *argv[]){
+    std::cout << "XD" << std::endl;
     if (argc == 1) throw std::runtime_error("No input file specified");
 
     std::ifstream sourceCode(argv[1]);
